@@ -166,7 +166,7 @@ export function useDiscovery() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/v1/discovery/query', {
+      const res = await fetch('/v1/discovery/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -181,13 +181,37 @@ export function useDiscovery() {
       })
 
       if (!res.ok) {
-        throw new Error(`Discovery gateway error: ${res.status} ${res.statusText}`)
+        throw new Error(`Discovery gateway streaming error: ${res.status} ${res.statusText}`)
       }
 
-      const data = await res.json()
-      setResponse(data)
+      const reader = res.body?.getReader()
+      if (!reader) {
+        throw new Error('Response body reader not available')
+      }
+
+      const decoder = new TextDecoder('utf-8')
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (line.includes('event: result')) {
+            const dataMatch = line.match(/data: (.*)/)
+            if (dataMatch && dataMatch[1]) {
+              const data: DiscoveryResponse = JSON.parse(dataMatch[1])
+              setResponse(data)
+            }
+          }
+        }
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to execute query')
+      setError(err.message || 'Failed to execute query stream')
     } finally {
       setLoading(false)
     }
