@@ -22,7 +22,6 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux, authenticator auth.Authenti
 	searchAuth := auth.Middleware(authenticator, "search")
 
 	mux.Handle("POST /v1/search", searchAuth(http.HandlerFunc(h.Search)))
-	mux.Handle("POST /v1/discovery/query", searchAuth(http.HandlerFunc(h.DiscoveryQuery)))
 }
 
 func (h *Handler) Search(w http.ResponseWriter, r *http.Request) {
