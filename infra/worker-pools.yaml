@@ -1,0 +1,9 @@
+# One immutable image may run several explicitly named worker roles.
+# Replace WORKER_POOL_SPECS before deployment; each entry is name:command:instances.
+service: enterprise-search
+projectID: REPLACE_PROJECT_ID
+region: us-central1
+runtimeEnvironment: REPLACE_RUNTIME_ENV
+serviceAccount: REPLACE_SERVICE_ACCOUNT
+workerPoolSpecs:
+  - REPLACE_POOL_NAME:REPLACE_ROLE:1

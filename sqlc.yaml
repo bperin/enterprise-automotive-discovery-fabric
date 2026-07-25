@@ -1,0 +1,45 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    schema: "migrations/postgres"
+    queries: "internal/product/queries/query.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "internal/product/repository/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+
+  - engine: "postgresql"
+    schema: "migrations/postgres"
+    queries: "internal/dealer/queries/query.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "internal/dealer/repository/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+
+  - engine: "postgresql"
+    schema: "migrations/postgres"
+    queries: "internal/fitment/queries/query.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "internal/fitment/repository/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+
+  - engine: "postgresql"
+    schema: "migrations/postgres"
+    queries: "internal/inventory/queries/query.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "internal/inventory/repository/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true

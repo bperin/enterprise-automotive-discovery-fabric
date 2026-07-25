@@ -1,0 +1,23 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: enterprise-search
+spec:
+  template:
+    spec:
+      serviceAccountName: 
+      containers:
+      - image: us-docker.pkg.dev///enterprise-search:
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: 1
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: 
+              key: latest
+        readinessProbe:
+          httpGet:
+            path: /healthz

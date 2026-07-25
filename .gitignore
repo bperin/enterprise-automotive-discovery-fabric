@@ -1,0 +1,20 @@
+# enterprise-search .gitignore
+
+bin/
+var/
+tmp/
+.env
+.env.local
+*.db
+*.sqlite
+*.log
+
+# Node dependencies
+web/node_modules/
+web/dist/
+web/build/
+
+# IDE / Kilo local config
+.kilo/
+.idea/
+.vscode/

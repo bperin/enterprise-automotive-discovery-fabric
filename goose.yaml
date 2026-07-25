@@ -1,0 +1,16 @@
+# Goose Database Migration Configuration
+# See https://github.com/pressly/goose for details.
+
+env: development
+
+development:
+  driver: postgres
+  open: postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@${DB_HOST:-localhost}:${DB_PORT:-5432}/${DB_NAME:-enterprise_search}?sslmode=disable
+  dir: migrations
+  table: goose_db_version
+
+production:
+  driver: postgres
+  open: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require
+  dir: migrations
+  table: goose_db_version
