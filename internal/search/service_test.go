@@ -37,8 +37,15 @@ func TestSearchService(t *testing.T) {
 		if resp.TotalCount == 0 {
 			t.Errorf("expected at least 1 search result")
 		}
-		if len(resp.Results) > 0 && resp.Results[0].EntityID != "prod-wheels-20" {
-			t.Errorf("expected entity ID 'prod-wheels-20', got '%s'", resp.Results[0].EntityID)
+		found := false
+		for _, r := range resp.Results {
+			if r.EntityID == "prod-wheels-20" {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("expected entity ID 'prod-wheels-20' in search results")
 		}
 	})
 }

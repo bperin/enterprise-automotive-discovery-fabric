@@ -27,6 +27,7 @@ build:
 	go build -o bin/enterprise-search ./cmd/enterprise-search
 	go build -o bin/workflow ./cmd/workflow
 	go build -o bin/seed ./cmd/seed
+	go build -o bin/seed-permutations ./cmd/seed-permutations
 	go build -o bin/evaluation-runner ./cmd/evaluation-runner
 
 seed:

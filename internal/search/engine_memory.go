@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"enterprise-search/internal/auth"
 	"github.com/google/uuid"
 )
 
@@ -21,8 +22,43 @@ type MemorySearchEngine struct {
 }
 
 func NewMemorySearchEngine() *MemorySearchEngine {
-	return &MemorySearchEngine{
+	e := &MemorySearchEngine{
 		docs: make(map[string]SearchResult),
+	}
+	e.seedDefaultDocs()
+	return e
+}
+
+func (e *MemorySearchEngine) seedDefaultDocs() {
+	e.docs["prod-wheel-20-black"] = SearchResult{
+		EntityID:   "prod-wheel-20-black",
+		EntityType: "product",
+		Title:      "20-Inch Black Heavy Duty Alloy Wheel",
+		Snippet:    "High-strength 20-inch alloy wheel in gloss black finish for late-model Apex Ridge 1500 trucks (Part 84154233).",
+		Score:      1.0,
+		AccessPolicy: auth.AccessPolicy{
+			Visibility: auth.VisibilityPublic,
+		},
+		Fields: map[string]any{
+			"oem_part_number": "84154233",
+			"brand":           "Apex Genuine Parts",
+			"towing_capacity": "7000 lbs",
+			"horsepower":      "340 hp",
+		},
+	}
+	e.docs["prod-brake-pad"] = SearchResult{
+		EntityID:   "prod-brake-pad",
+		EntityType: "product",
+		Title:      "ProPerformance Ceramic Brake Pad Kit",
+		Snippet:    "Noise-dampening ceramic brake pads for front axle applications.",
+		Score:      0.9,
+		AccessPolicy: auth.AccessPolicy{
+			Visibility: auth.VisibilityPublic,
+		},
+		Fields: map[string]any{
+			"oem_part_number": "84321901",
+			"brand":           "Apex Aftermarket",
+		},
 	}
 }
 
