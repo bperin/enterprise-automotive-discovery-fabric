@@ -13,6 +13,8 @@ import (
 
 	"enterprise-search/internal/auth"
 	"enterprise-search/internal/config"
+	"enterprise-search/internal/content"
+	"enterprise-search/internal/dealer"
 	"enterprise-search/internal/discovery"
 	"enterprise-search/internal/evidence"
 	"enterprise-search/internal/fitment"
@@ -20,6 +22,7 @@ import (
 	"enterprise-search/internal/inventory"
 	"enterprise-search/internal/product"
 	"enterprise-search/internal/search"
+	"enterprise-search/internal/vehicle"
 )
 
 func main() {
@@ -67,6 +70,9 @@ func main() {
 	fitmentRepo := fitment.NewMemoryRepository()
 	inventoryRepo := inventory.NewMemoryRepository()
 	evidenceRepo := evidence.NewMemoryRepository()
+	dealerRepo := dealer.NewMemoryRepository()
+	vehicleRepo := vehicle.NewMemoryRepository()
+	contentRepo := content.NewMemoryRepository()
 	searchEngine := search.NewMemorySearchEngine()
 
 	// 5. Application Services
@@ -84,6 +90,9 @@ func main() {
 	evidenceHandler := evidence.NewHandler(evidenceSvc)
 	searchHandler := search.NewHandler(searchSvc)
 	discoveryHandler := discovery.NewHandler(discoverySvc)
+	dealerHandler := dealer.NewHandler(dealerRepo)
+	vehicleHandler := vehicle.NewHandler(vehicleRepo)
+	contentHandler := content.NewHandler(contentRepo)
 
 	// 7. Route Registration
 	mux := http.NewServeMux()
@@ -94,6 +103,9 @@ func main() {
 	evidenceHandler.RegisterRoutes(mux, authenticator)
 	searchHandler.RegisterRoutes(mux, authenticator)
 	discoveryHandler.RegisterRoutes(mux, authenticator)
+	dealerHandler.RegisterRoutes(mux, authenticator)
+	vehicleHandler.RegisterRoutes(mux, authenticator)
+	contentHandler.RegisterRoutes(mux, authenticator)
 
 	// Health and Readiness probes
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
