@@ -166,53 +166,38 @@ export function useDiscovery() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/v1/discovery/stream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer mock-token-search',
-        },
-        body: JSON.stringify({
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const wsUrl = `${protocol}//${window.location.host}/v1/discovery/ws`
+      const ws = new WebSocket(wsUrl)
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({
           query: req.query,
           brand: req.brand || 'ApexMotors',
           channel: req.channel || 'public_web',
           location: req.location || { postal_code: '78701', radius_miles: 50 },
-        }),
-      })
-
-      if (!res.ok) {
-        throw new Error(`Discovery gateway streaming error: ${res.status} ${res.statusText}`)
+        }))
       }
 
-      const reader = res.body?.getReader()
-      if (!reader) {
-        throw new Error('Response body reader not available')
-      }
-
-      const decoder = new TextDecoder('utf-8')
-      let buffer = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n\n')
-        buffer = lines.pop() || ''
-
-        for (const line of lines) {
-          if (line.includes('event: result')) {
-            const dataMatch = line.match(/data: (.*)/)
-            if (dataMatch && dataMatch[1]) {
-              const data: DiscoveryResponse = JSON.parse(dataMatch[1])
-              setResponse(data)
-            }
+      ws.onmessage = (event) => {
+        try {
+          const parsed = JSON.parse(event.data)
+          if (parsed.answer || parsed.results) {
+            setResponse(parsed)
+            setLoading(false)
+            ws.close()
           }
+        } catch (e) {
+          // ignore parsing error for status messages
         }
+      }
+
+      ws.onerror = (err) => {
+        setError('WebSocket connection error')
+        setLoading(false)
       }
     } catch (err: any) {
       setError(err.message || 'Failed to execute query stream')
-    } finally {
       setLoading(false)
     }
   }, [])

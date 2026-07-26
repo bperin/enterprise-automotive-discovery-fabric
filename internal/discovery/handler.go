@@ -6,9 +6,16 @@ import (
 
 	"enterprise-search/internal/auth"
 	"enterprise-search/internal/http/response"
+	"github.com/gorilla/websocket"
 )
 
-// Handler exposes the Unified Answer and Discovery Gateway REST endpoint in DDD.
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true // Allow all origins for dev/demo
+	},
+}
+
+// Handler exposes the Unified Answer and Discovery Gateway REST, SSE, and WSS endpoints in DDD.
 type Handler struct {
 	service *Service
 }
@@ -18,13 +25,14 @@ func NewHandler(service *Service) *Handler {
 }
 
 // RegisterRoutes attaches the authenticated discovery endpoints to an http.ServeMux.
-// @Summary Query unified discovery gateway via REST or SSE
+// @Summary Query unified discovery gateway via REST, SSE, or WSS
 // @Security OAuth2Auth[search]
 func (h *Handler) RegisterRoutes(mux *http.ServeMux, authenticator auth.Authenticator) {
 	searchAuth := auth.Middleware(authenticator, "search")
 
 	mux.Handle("POST /v1/discovery/query", searchAuth(http.HandlerFunc(h.ProcessQuery)))
 	mux.Handle("POST /v1/discovery/stream", searchAuth(http.HandlerFunc(h.StreamQuery)))
+	mux.Handle("GET /v1/discovery/ws", http.HandlerFunc(h.WebSocketQuery))
 }
 
 // ProcessQuery handles POST /v1/discovery/query REST requests.
@@ -92,4 +100,43 @@ func (h *Handler) StreamQuery(w http.ResponseWriter, r *http.Request) {
 	respData, _ := json.Marshal(resp)
 	w.Write([]byte("event: result\ndata: " + string(respData) + "\n\n"))
 	flusher.Flush()
+}
+
+// WebSocketQuery handles GET /v1/discovery/ws WebSocket / WSS streaming connections.
+// @Summary Real-time bidirectional streaming for ADK 2.0 graph workflow execution
+// @Router /v1/discovery/ws [get]
+func (h *Handler) WebSocketQuery(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+
+	for {
+		_, message, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+
+		var req DiscoveryRequest
+		if err := json.Unmarshal(message, &req); err != nil {
+			errData, _ := json.Marshal(map[string]string{"error": "Failed to parse discovery request JSON"})
+			_ = conn.WriteMessage(websocket.TextMessage, errData)
+			continue
+		}
+
+		// Send graph execution start status
+		startData, _ := json.Marshal(map[string]string{"status": "graph_started", "query": req.Query})
+		_ = conn.WriteMessage(websocket.TextMessage, startData)
+
+		resp, err := h.service.ProcessQuery(r.Context(), req)
+		if err != nil {
+			errData, _ := json.Marshal(map[string]string{"error": err.Error()})
+			_ = conn.WriteMessage(websocket.TextMessage, errData)
+			continue
+		}
+
+		respData, _ := json.Marshal(resp)
+		_ = conn.WriteMessage(websocket.TextMessage, respData)
+	}
 }

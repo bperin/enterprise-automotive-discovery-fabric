@@ -13,6 +13,7 @@ import (
 	"google.golang.org/adk/v2/agent"
 	"google.golang.org/adk/v2/agent/workflowagent"
 	"google.golang.org/adk/v2/runner"
+	"google.golang.org/adk/v2/session"
 	"google.golang.org/adk/v2/workflow"
 )
 
@@ -81,14 +82,17 @@ func NewGraphOrchestrator(searchSvc *search.Service) (*GraphOrchestrator, error)
 
 	orch.rootAgent = rootAgent
 
-	// Initialize ADK 2.0 Execution Runner
+	// Initialize ADK 2.0 Execution Runner with in-memory session service
+	sessionSvc := session.InMemoryService()
 	r, err := runner.New(runner.Config{
-		AppName: "enterprise-automotive-discovery",
-		Agent:   rootAgent,
+		AppName:        "enterprise-automotive-discovery",
+		Agent:          rootAgent,
+		SessionService: sessionSvc,
 	})
-	if err == nil {
-		orch.runner = r
+	if err != nil {
+		return nil, fmt.Errorf("failed creating ADK 2.0 runner: %w", err)
 	}
+	orch.runner = r
 
 	return orch, nil
 }

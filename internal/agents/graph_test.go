@@ -34,4 +34,12 @@ func TestGraphOrchestrator_ExecuteGraph(t *testing.T) {
 	if len(resState.Trace) == 0 {
 		t.Errorf("expected execution trace steps, got none")
 	}
+
+	if orch.Runner() == nil {
+		t.Errorf("expected ADK 2.0 runner instance, got nil")
+	}
+
+	if orch.RootAgent() == nil {
+		t.Errorf("expected ADK 2.0 root agent instance, got nil")
+	}
 }
