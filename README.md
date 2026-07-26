@@ -169,7 +169,7 @@ flowchart LR
 1. **JSONL Bulk Stream**: `cmd/seed-permutations` writes formatted JSONL records (e.g. `var/vertex_search_permutations.jsonl`).
 2. **GCS Stage**: Uploaded to Google Cloud Storage (`gs://automotive-discovery-corpus/permutations/*.jsonl`).
 3. **Async Bulk Import**: `ImportGCS()` in `internal/infra/vertexrag/adapter.go` triggers `ImportRagFilesRequest` against Vertex AI RAG Engine.
-4. **Managed Vector Indexing**: GCP automatically parses, chunks, generates 768/1536-dim embeddings via `gemini-embedding-001`, and updates the Vertex Managed Vector DB asynchronously.
+4. **Gemini Embedding 2.0 Multimodal Indexing**: GCP automatically parses, chunks, and generates unified multimodal embeddings (text, product photography, mechanical diagrams, installation videos, and PDF manuals) using **Gemini Embedding 2.0**, updating the Vertex Managed Vector DB asynchronously.
 5. **Real-Time Graph Retrieval**: The ADK 2.0 workflow graph queries the corpus via `NativeRAGTool` with zero application-side vector management overhead.
 
 ---
