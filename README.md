@@ -233,11 +233,13 @@ Once implemented, this platform serves as the foundation for broader enterprise 
 
 ---
 
-## Pre-Deployment Verification & Out-of-Scope Roadmap
+## Pre-Deployment Verification & POC Scope Boundaries
 
-### Production Readiness & Testing Scope
-While this platform implements a fully operational local runtime, local SQLite/in-memory fallbacks, and passing unit test suites (`go test ./...`), additional testing is required prior to production deployment:
-- **Load & Concurrency Testing**: High-throughput benchmarking under multi-tenant SSE streaming workloads (`/v1/discovery/stream`).
+### Proof-of-Concept (POC) Nature & Production Next Steps
+While this project provides a working **Proof-of-Concept (POC)** built against real **Google Cloud Platform (GCP)** and **Vertex AI** production components (`Agent Search`, `Vertex AI RAG Engine`, `Gemini Embedding 2.0`, and `ADK 2.0 Go Workflow Graphs`), specific enterprise use cases remain subject to business determination. The critical next steps for production deployment include:
+- **Prompt Engineering & System Instruction Tuning**: Fine-tuning domain-specific system instructions, brand tone guidelines, and grounding prompt templates across graph workflow nodes.
+- **Model Tuning & Few-Shot Evaluation**: Tailoring Gemini model parameters and few-shot examples for specialized automotive fitment and parts cross-referencing scenarios.
+- **Load & Concurrency Testing**: High-throughput benchmarking under multi-tenant WSS / SSE streaming workloads (`/v1/discovery/ws` and `/v1/discovery/stream`).
 - **GCP IAM & Workload Identity Validation**: Verification of production Cloud SQL Auth Proxy and Vertex AI IAM permission boundaries.
 - **End-to-End RAG Corpus Validation**: Testing live chunking and vector distance thresholds against full-scale PDF owner manual collections in Vertex AI RAG Engine.
 
