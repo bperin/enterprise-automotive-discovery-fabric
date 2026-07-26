@@ -143,6 +143,37 @@ sequenceDiagram
 
 ---
 
+## High-Volume Ingestion & Vertex RAG Store Ingestion Architecture
+
+When seeding millions of records (generated via `cmd/seed-permutations`), records follow a managed GCS-to-Vertex bulk ingestion pipeline rather than line-by-line API calls:
+
+```mermaid
+flowchart LR
+    GEN["Synthetic Permutation Generator (`cmd/seed-permutations`)"] --> JSONL[("High-Volume JSONL Artifacts (var/*.jsonl)")]
+    JSONL --> GCS[("Google Cloud Storage (gs://automotive-discovery-corpus/)")]
+    
+    subgraph VertexRAG["Vertex AI RAG Engine Managed Pipeline"]
+        IMPORT["m.client.ImportRagFiles() (`internal/infra/vertexrag`)"]
+        CHUNKER["Managed Auto-Chunking & Segmentation"]
+        EMBEDDER["Gemini Embedding 2 Vector Generator"]
+        VECTOR_DB[("Vertex Managed Vector DB")]
+        
+        IMPORT --> CHUNKER --> EMBEDDER --> VECTOR_DB
+    end
+
+    GCS --> IMPORT
+    VECTOR_DB --> ADK["ADK 2.0 Native RAG Tool (`internal/ragworkflow`)"]
+```
+
+### Millions-Scale Ingestion Steps:
+1. **JSONL Bulk Stream**: `cmd/seed-permutations` writes formatted JSONL records (e.g. `var/vertex_search_permutations.jsonl`).
+2. **GCS Stage**: Uploaded to Google Cloud Storage (`gs://automotive-discovery-corpus/permutations/*.jsonl`).
+3. **Async Bulk Import**: `ImportGCS()` in `internal/infra/vertexrag/adapter.go` triggers `ImportRagFilesRequest` against Vertex AI RAG Engine.
+4. **Managed Vector Indexing**: GCP automatically parses, chunks, generates 768/1536-dim embeddings via `gemini-embedding-001`, and updates the Vertex Managed Vector DB asynchronously.
+5. **Real-Time Graph Retrieval**: The ADK 2.0 workflow graph queries the corpus via `NativeRAGTool` with zero application-side vector management overhead.
+
+---
+
 ## Domain Capabilities & Code Structure
 
 Every business domain is isolated in explicit Domain-Driven Design (DDD) packages:
