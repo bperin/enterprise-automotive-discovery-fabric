@@ -114,6 +114,33 @@ flowchart TB
 - **Human-in-the-Loop (HITL) Gate**: Quarantines unverified document-derived claims or low-confidence fitment assertions for staff review before publication.
 - **Source Authority Hierarchy**: Enforces deterministic rules where direct database specifications override marketing copy or RAG text.
 
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Client / Web App
+    participant Gateway as Discovery Gateway API
+    participant Graph as ADK 2.0 Graph Orchestrator
+    participant Specialist as Search Specialist Node
+    participant VertexRAG as Vertex AI RAG Engine
+    participant AgentSearch as Agent Search Platform
+    participant SpecDB as PostgreSQL Spec DB
+
+    User->>Gateway: POST /v1/discovery/stream (Query + OIDC)
+    Gateway->>Graph: Execute Graph Workflow
+    Graph->>Specialist: runSearchSpecialist()
+    par Parallel Vector & Structured Queries
+        Specialist->>VertexRAG: Retrieve Manuals & Technical Bulletins
+        Specialist->>AgentSearch: Retrieve Marketing & Web Pages
+        Specialist->>SpecDB: Query Authoritative Specifications
+    end
+    VertexRAG-->>Specialist: Context Passages
+    AgentSearch-->>Specialist: Search Documents
+    SpecDB-->>Specialist: Verified Spec Records
+    Specialist-->>Graph: Candidate Records
+    Graph->>Gateway: Grounded Response + Evidence Citations
+    Gateway-->>User: SSE Stream (Data & Citations)
+```
+
 ---
 
 ## Domain Capabilities & Code Structure
@@ -172,6 +199,22 @@ Once implemented, this platform serves as the foundation for broader enterprise 
 3. **Autonomous Customer Support**: Deflect repetitive support queries by grounding answers directly in verified owner manuals and technical bulletins via Vertex AI RAG Engine.
 4. **Real-time Inventory Matching**: Bridge vehicle shopper search directly to live dealer inventory with geo-location awareness.
 5. **Centralized Write Authority & Sales Operations (Planned Next Step)**: A unified management plane enabling authorized dealer staff and sales representatives to perform real-time inventory updates, hold vehicles for customers, and record stock observations with distributed transaction boundaries. *(Design phase complete; implementation planned as a 1-day follow-up phase).*
+
+---
+
+## Pre-Deployment Verification & Out-of-Scope Roadmap
+
+### Production Readiness & Testing Scope
+While this platform implements a fully operational local runtime, local SQLite/in-memory fallbacks, and passing unit test suites (`go test ./...`), additional testing is required prior to production deployment:
+- **Load & Concurrency Testing**: High-throughput benchmarking under multi-tenant SSE streaming workloads (`/v1/discovery/stream`).
+- **GCP IAM & Workload Identity Validation**: Verification of production Cloud SQL Auth Proxy and Vertex AI IAM permission boundaries.
+- **End-to-End RAG Corpus Validation**: Testing live chunking and vector distance thresholds against full-scale PDF owner manual collections in Vertex AI RAG Engine.
+
+### Explicit Out-of-Scope for MVP
+- Financial transactions, consumer checkout, and credit card processing.
+- Live dealership management system (DMS) write-backs beyond local inventory observations.
+- VIN decoding for non-synthetic vehicle configurations.
+- Real-time consumer location tracking or Bluetooth beacon integration.
 
 ---
 
