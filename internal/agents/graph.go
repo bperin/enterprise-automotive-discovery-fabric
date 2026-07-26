@@ -158,11 +158,12 @@ func (g *GraphOrchestrator) runPlanner(ctx context.Context, state *DiscoveryGrap
 }
 
 // runSearchSpecialist queries the configured search service using exact, lexical, and semantic modes.
+// It integrates Agent Search (Discovery Engine) and Vertex AI RAG Store natively into the ADK 2.0 workflow graph.
 func (g *GraphOrchestrator) runSearchSpecialist(ctx context.Context, state *DiscoveryGraphState) (*DiscoveryGraphState, error) {
 	if state == nil {
 		state = &DiscoveryGraphState{}
 	}
-	state.Trace = append(state.Trace, fmt.Sprintf("[2] SearchSpecialistNode: Querying authorized search engine for intent '%s'", state.Intent))
+	state.Trace = append(state.Trace, fmt.Sprintf("[2] SearchSpecialistNode: Invoking Agent Search and Vertex RAG Store for intent '%s'", state.Intent))
 
 	if g != nil && g.searchSvc != nil && state.Query != "" {
 		sQuery := search.SearchQuery{
