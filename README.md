@@ -65,6 +65,8 @@ flowchart LR
     Legacy == "Replaced By" ==> Modern
 ```
 
+![Legacy vs Modern GCP Architecture](docs/diagrams/legacy_vs_modern.png)
+
 | Concern | Fragmented vendor model | Discovery Fabric model |
 |---|---|---|
 | Source integration | Repeated by use case or vendor | One reusable adapter per source |
@@ -108,6 +110,8 @@ flowchart TB
     SYNTHESIS --> END(["Typed Discovery Response"])
 ```
 
+![ADK 2.0 Workflow Graph](docs/diagrams/adk_workflow_graph.png)
+
 ### Key Graph Components:
 - **Receiver-Based Function Nodes**: Statically compiled Go method handlers attached directly to core orchestrators, providing type-safe access to infrastructure adapters.
 - **Dynamic Retrieval Fanout**: Parallel execution across Agent Search, Vertex AI RAG Engine, and direct PostgreSQL stores.
@@ -141,6 +145,8 @@ sequenceDiagram
     Gateway-->>User: SSE Stream (Data & Citations)
 ```
 
+![Graph RAG Sequence Diagram](docs/diagrams/graph_rag_sequence.png)
+
 ---
 
 ## High-Volume Ingestion & Vertex RAG Store Ingestion Architecture
@@ -164,6 +170,8 @@ flowchart LR
     GCS --> IMPORT
     VECTOR_DB --> ADK["ADK 2.0 Native RAG Tool (`internal/ragworkflow`)"]
 ```
+
+![High Volume Ingestion Pipeline](docs/diagrams/high_volume_ingestion.png)
 
 ### Millions-Scale Ingestion Steps:
 1. **JSONL Bulk Stream**: `cmd/seed-permutations` writes formatted JSONL records (e.g. `var/vertex_search_permutations.jsonl`).
@@ -206,6 +214,8 @@ flowchart LR
     METRICS --> BQ[("BigQuery Telemetry Store")]
     METRICS --> GCS[("GCS Evaluation Artifact Bucket")]
 ```
+
+![Continuous Evaluation Pipeline](docs/diagrams/evaluation_pipeline.png)
 
 ### Production Evaluation Metrics
 - **Recall@K & MRR**: Measures exact and semantic retrieval coverage against the golden benchmark.

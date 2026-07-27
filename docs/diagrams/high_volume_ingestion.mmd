@@ -1,0 +1,15 @@
+flowchart LR
+    GEN["Synthetic Permutation Generator"] --> JSONL[("High-Volume JSONL Artifacts")]
+    JSONL --> GCS[("Google Cloud Storage gs://...")]
+    
+    subgraph VertexRAG["Vertex AI RAG Engine Managed Pipeline"]
+        IMPORT["m.client.ImportRagFiles()"]
+        CHUNKER["Managed Auto-Chunking & Segmentation"]
+        EMBEDDER["Gemini Embedding 2.0 Multimodal Generator"]
+        VECTOR_DB[("Vertex Managed Vector DB")]
+        
+        IMPORT --> CHUNKER --> EMBEDDER --> VECTOR_DB
+    end
+
+    GCS --> IMPORT
+    VECTOR_DB --> ADK["ADK 2.0 Native RAG Tool"]

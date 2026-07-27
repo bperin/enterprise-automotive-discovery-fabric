@@ -1,0 +1,24 @@
+sequenceDiagram
+    autonumber
+    actor User as Client / Web App
+    participant Gateway as Discovery Gateway API
+    participant Graph as ADK 2.0 Graph Orchestrator
+    participant Specialist as Search Specialist Node
+    participant VertexRAG as Vertex AI RAG Engine
+    participant AgentSearch as Agent Search Platform
+    participant SpecDB as PostgreSQL Spec DB
+
+    User->>Gateway: POST /v1/discovery/stream (Query + OIDC)
+    Gateway->>Graph: Execute Graph Workflow
+    Graph->>Specialist: runSearchSpecialist()
+    par Parallel Vector & Structured Queries
+        Specialist->>VertexRAG: Retrieve Manuals & Technical Bulletins
+        Specialist->>AgentSearch: Retrieve Marketing & Web Pages
+        Specialist->>SpecDB: Query Authoritative Specifications
+    end
+    VertexRAG-->>Specialist: Context Passages
+    AgentSearch-->>Specialist: Search Documents
+    SpecDB-->>Specialist: Verified Spec Records
+    Specialist-->>Graph: Candidate Records
+    Graph->>Gateway: Grounded Response + Evidence Citations
+    Gateway-->>User: SSE / WSS Stream (Data & Citations)

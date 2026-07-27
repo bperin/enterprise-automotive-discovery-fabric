@@ -1,0 +1,9 @@
+flowchart LR
+    GOLDEN["Golden Evaluation Dataset"] --> RUNNER["Evaluation Runner"]
+    RUNNER --> PLATFORM["GCP Discovery Gateway"]
+    RUNNER --> LEGACY["Legacy SaaS Bot Baseline"]
+    
+    PLATFORM & LEGACY --> EVAL["Relevance & Grounding Evaluator"]
+    EVAL --> METRICS["Recall@K, MRR, Groundedness %"]
+    METRICS --> BQ[("BigQuery Telemetry Store")]
+    METRICS --> GCS[("GCS Evaluation Artifact Bucket")]

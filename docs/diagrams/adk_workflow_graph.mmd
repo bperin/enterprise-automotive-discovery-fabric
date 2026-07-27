@@ -1,0 +1,19 @@
+flowchart TB
+    START(["User Request"]) --> INTAKE["Context & Permission Filter"]
+    INTAKE --> PLANNER["Intent Planner Node"]
+
+    PLANNER -->|Product Spec Query| SPEC_BRANCH["Query Product DB & Spec Sheets"]
+    PLANNER -->|Live Inventory Query| INV_BRANCH["Query Dealer Inventory API"]
+    PLANNER -->|Support / Manual Query| DOC_BRANCH["Query Vertex AI RAG Engine"]
+    PLANNER -->|Visual Image Upload| MM_BRANCH["Execute Multimodal Embedding Match"]
+
+    SPEC_BRANCH & INV_BRANCH & DOC_BRANCH & MM_BRANCH --> AUTHORITY["Authority Resolver Node"]
+    AUTHORITY --> GROUNDING["Grounding & Policy Gate"]
+    
+    GROUNDING -- High Confidence / Verified --> SYNTHESIS["Grounded Synthesizer Node"]
+    GROUNDING -- Low Confidence / Quarantined Claim --> HITL["Human-in-the-Loop Review Queue"]
+    
+    HITL -->|Approved by Compliance/Staff| SYNTHESIS
+    HITL -->|Rejected| QUARANTINE["Quarantine / Suppress Claim"]
+
+    SYNTHESIS --> END(["Typed Discovery Response"])

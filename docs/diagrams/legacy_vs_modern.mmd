@@ -1,0 +1,21 @@
+flowchart LR
+    subgraph Legacy["Fragmented 3rd-Party Vendor Stack"]
+        direction TB
+        SCRAPER["Brittle Web Crawlers"]
+        VEC_DB[("Isolated Vector DB Vendor")]
+        CHAIN["Custom Point-Solution Middleware"]
+        BOT_SAAS["3rd-Party Chatbot SaaS"]
+        SCRAPER --> VEC_DB --> CHAIN --> BOT_SAAS
+    end
+
+    subgraph Modern["GCP-Native Enterprise AI Platform (ADK 2.0)"]
+        direction TB
+        INGEST["Canonical Go Ingestion"]
+        AGENT_SRCH["Agent Search Platform"]
+        RAG_ENG["Vertex AI RAG Engine"]
+        ADK_GRAPH["ADK 2.0 Workflow Graph"]
+        GATEWAY["Unified Discovery Gateway"]
+        INGEST --> AGENT_SRCH & RAG_ENG --> ADK_GRAPH --> GATEWAY
+    end
+
+    Legacy == "Replaced By" ==> Modern
